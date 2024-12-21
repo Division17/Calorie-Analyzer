@@ -12,14 +12,22 @@ genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 def get_gemini_response(input_prompt, image_data, input_text):
 
-    model = genai.GenerativeModel('gemini-vision-pro')
-    image_data = image_data[0]
-    try:
-        response = model.generate_content([input_prompt, image_data, input_text])
-        return response.text
-    except Exception as e:
-        st.error(f"An error occurred: {e}")
-        return None
+
+  client = genai.GenerativeAI()  
+  models = client.list_models()
+ 
+
+
+  model = genai.GenerativeModel('gemini-vision-pro') 
+
+  image_data = image_data[0]
+  try:
+  
+    response = model.process_content([input_prompt, image_data, input_text])
+    return response.text  
+  except Exception as e:
+    st.error(f"An error occurred: {e}")
+    return None
 
 
 def input_image_setup(uploaded_file):
@@ -71,12 +79,12 @@ Suggested excercises:
 """
 
 if submit:
-    image_data = input_image_setup(uploaded_file)
-    if image_data:
-        with st.spinner("Analyzing image..."):  # Use a spinner while processing
-            response = get_gemini_response(input_prompt, image_data, input_text)
-            if response:
-                st.subheader("The Calories present are:-")
-                st.write(response)
-            else:
-                st.warning("An error occurred during processing.")
+  image_data = input_image_setup(uploaded_file)
+  if image_data:
+    with st.spinner("Analyzing image..."):  
+      response = get_gemini_response(input_prompt, image_data, input_text)
+      if response:
+        st.subheader("The Calories present are:-")
+        st.write(response)
+      else:
+        st.warning("An error occurred during processing.")
