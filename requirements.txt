@@ -7,4 +7,4 @@ chromadb
 pdf2image
 faiss-cpu
 langchain_google_genai
-@google-cloud/generative-ai
+google-cloud/generative-ai
