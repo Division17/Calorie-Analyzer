@@ -1,32 +1,17 @@
 from dotenv import load_dotenv
-import streamlit as st
-import os
-import google.generativeai as genai
-from PIL import Image
 
-# Load environment variables
 load_dotenv()
 
-# Configure the generative AI API with your API key
+import streamlit as st
+import os
+from PIL import Image
+
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
-def list_models():
-    try:
-        models = genai.ListModels()
-        return models
-    except Exception as e:
-        st.error(f"An error occurred while listing models: {e}")
-        return []
 
 def get_gemini_response(input_prompt, image_data, input_text):
-    # Find and use a supported model
-    models = list_models()
-    if not models:
-        return None
-    
-    model_name = models[0]['name']  # Use the first available model for demonstration
-    model = genai.GenerativeModel(model_name)
-    
+
+    model = genai.GenerativeModel('gemini-vision-pro')
     image_data = image_data[0]
     try:
         response = model.generate_content([input_prompt, image_data, input_text])
@@ -35,8 +20,9 @@ def get_gemini_response(input_prompt, image_data, input_text):
         st.error(f"An error occurred: {e}")
         return None
 
+
 def input_image_setup(uploaded_file):
-    if uploaded_file is not None and uploaded_file.name:  # Check for filename existence
+    if uploaded_file is not None and uploaded_file.name:  
         bytes_data = uploaded_file.getvalue()
         image_parts = [
             {
@@ -48,6 +34,7 @@ def input_image_setup(uploaded_file):
     else:
         st.error("Please upload an image.")
         return None
+
 
 st.set_page_config(page_title="Calorie Analyzer")
 
@@ -61,22 +48,25 @@ if uploaded_file is not None:
 
 submit = st.button("Analyze image")
 
+
 input_prompt = """
 You are an expert in nutritionist where you need to see the food items from the image
-               and calculate the total calories, also provide the details of every food items with calories intake,
-              along with it it provide whether it is healthy or unhealthy and suggest a tailored exercise routine to 
-               burn the calorie intake with the time it will take in the below format
+and calculate the total calories, also provide the details of every food items with calories intake,
+along with it it provide whether it is healthy or unhealthy and suggest a tailored exercise routine to 
+burn the calorie intake with the time it will take in the below format
 
-               1. Item 1 - no of calories  healthy or unhealty
-               2. Item 2 - no of calories  healthy or unhealty
-               ----
-               ----
-               
-               Suggested excercises:
-               1. Exercise 1 - for time duration, will burn x calories
-               2. Exercise 2 - for time duration, will bun x calories
-               -----
-               ------
+1. Item 1 - no of calories (healthy or unhealty)
+2. Item 2 - no of calories (healthy or unhealty)
+----
+----
+
+Suggested excercises:
+1. Exercise 1 - for time duration, will burn x calories
+2. Exercise 2 - for time duration, will burn x calories
+-----
+------
+
+
 """
 
 if submit:
@@ -84,8 +74,8 @@ if submit:
     if image_data:
         with st.spinner("Analyzing image..."):  # Use a spinner while processing
             response = get_gemini_response(input_prompt, image_data, input_text)
-        if response:
-            st.subheader("The Calories present are:-")
-            st.write(response)
-        else:
-            st.warning("An error occurred during processing.")
+            if response:
+                st.subheader("The Calories present are:-")
+                st.write(response)
+            else:
+                st.warning("An error occurred during processing.")
