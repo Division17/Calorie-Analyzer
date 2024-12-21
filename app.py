@@ -1,18 +1,32 @@
 from dotenv import load_dotenv
-
-load_dotenv()
-
 import streamlit as st
 import os
 import google.generativeai as genai
 from PIL import Image
 
+# Load environment variables
+load_dotenv()
 
+# Configure the generative AI API with your API key
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
+def list_models():
+    try:
+        models = genai.ListModels()
+        return models
+    except Exception as e:
+        st.error(f"An error occurred while listing models: {e}")
+        return []
 
 def get_gemini_response(input_prompt, image_data, input_text):
-    model = genai.GenerativeModel('gemini-vision-pro')
+    # Find and use a supported model
+    models = list_models()
+    if not models:
+        return None
+    
+    model_name = models[0]['name']  # Use the first available model for demonstration
+    model = genai.GenerativeModel(model_name)
+    
     image_data = image_data[0]
     try:
         response = model.generate_content([input_prompt, image_data, input_text])
@@ -20,8 +34,6 @@ def get_gemini_response(input_prompt, image_data, input_text):
     except Exception as e:
         st.error(f"An error occurred: {e}")
         return None
-
-
 
 def input_image_setup(uploaded_file):
     if uploaded_file is not None and uploaded_file.name:  # Check for filename existence
@@ -37,7 +49,6 @@ def input_image_setup(uploaded_file):
         st.error("Please upload an image.")
         return None
 
-
 st.set_page_config(page_title="Calorie Analyzer")
 
 st.header("Calorie Analyzer App")
@@ -50,8 +61,7 @@ if uploaded_file is not None:
 
 submit = st.button("Analyze image")
 
-# Replace with your actual prompt instructions for calorie calculation
-input_prompt="""
+input_prompt = """
 You are an expert in nutritionist where you need to see the food items from the image
                and calculate the total calories, also provide the details of every food items with calories intake,
               along with it it provide whether it is healthy or unhealthy and suggest a tailored exercise routine to 
@@ -67,8 +77,6 @@ You are an expert in nutritionist where you need to see the food items from the 
                2. Exercise 2 - for time duration, will bun x calories
                -----
                ------
-
-
 """
 
 if submit:
